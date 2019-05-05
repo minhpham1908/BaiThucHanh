@@ -1,5 +1,6 @@
 // Baitap1.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+// 127.0.0.1:9000
 
 #include "pch.h"
 #define _CRT_SECURE_NO_WARNINGS
