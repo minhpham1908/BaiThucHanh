@@ -83,7 +83,7 @@ void CreateSendBuffer() {
 	const char *boldStartTag = "<b>";
 	const char *boldEndTag = "</b>";
 	const char *italicStartTag = "<i>";
-	const char *italicEndTag = "</b>";
+	const char *italicEndTag = "</i>";
 	const char *lineBreakTag = "<br>";
 
 	strcat(sendBuffer, "<html><body>");
