@@ -6,6 +6,7 @@
 #include <iostream>
 #include <WinSock2.h>
 #include <string>
+#include <fstream>
 #pragma comment(lib,"ws2_32.lib")
 
 using namespace std;
@@ -61,9 +62,10 @@ DWORD WINAPI ClientThread(LPVOID lpParameter) {
 		bool correctPath = checkPath(recvBuffer);
 
 		printf("Current URL path: %s\n", URLPath);
+		printf("Current Window path: %s\n", WindowPath);
+
 		const char *header = "HTTP/1.1 200 OK\nContent-Type: text/html; charset = utf - 8\r\n\r\n";
 		CreateSendBuffer();
-		printf("Current Window path: %s\n", WindowPath);
 		if (correctPath == true) {
 			send(ClientSocket, header, strlen(header), 0);
 			send(ClientSocket, sendBuffer, strlen(sendBuffer), 0);
@@ -110,20 +112,17 @@ void getPath(char *path) {
 	memset(URLPath, 0, sizeof(URLPath));
 	strcat(URLPath, path);
 
-	//Chuyen / sang \\
+	// Chuyen / sang \\ /
 	repstr(path, '\\');
 	memset(WindowPath, 0, sizeof(WindowPath));
 	strcat(WindowPath, "C:");
 	strcat(WindowPath, path);
-	if (strcmp(path, "\\") == 0) {
-		strcat(WindowPath, "*.*");
-	}
-	else
-		strcat(WindowPath, "\\*.*");
+	strcat(WindowPath, "*.*");
 
 }
 
 void CreateSendBuffer() {
+	int num_of_file = 0;
 	memset(sendBuffer, 0, sizeof(sendBuffer));
 
 	const char *boldStartTag = "<b>";
@@ -142,6 +141,7 @@ void CreateSendBuffer() {
 	while (FindNextFileA(h, &DATA)) {
 		if (DATA.dwFileAttributes &
 			FILE_ATTRIBUTE_DIRECTORY) {
+			num_of_file++;
 			strcat(sendBuffer, boldStartTag);
 			strcat(sendBuffer, "<a href=\"");
 			strcat(sendBuffer, URLPath);
@@ -154,7 +154,9 @@ void CreateSendBuffer() {
 			strcat(sendBuffer, lineBreakTag);
 		}
 		else {
-			//Tao duong dan cho file
+			
+			num_of_file++;
+
 			strcat(sendBuffer, italicStartTag);
 			strcat(sendBuffer, "<a href=\"");
 			strcat(sendBuffer, URLPath);
@@ -166,6 +168,24 @@ void CreateSendBuffer() {
 			strcat(sendBuffer, lineBreakTag);
 		}
 	};
+	if (num_of_file == 0) {
+		string filePath(WindowPath);
+		filePath.erase(filePath.length() - 3, 3);
+		filePath;
+		cout << filePath << endl;
+		ifstream fileInput(filePath);
+		string s1;
+		if (fileInput.fail())
+			std::cout << "Failed to open this file!" << std::endl;
+		for (istreambuf_iterator<char, char_traits<char> > it(fileInput.rdbuf());
+			it != istreambuf_iterator<char, char_traits<char> >(); it++) {
+
+			s1 += *it;
+		}
+		strcat(sendBuffer, s1.c_str());
+		fileInput.close();
+		//Tao duong dan cho file
+	}
 
 	strcat(sendBuffer, "</body></html>");
 }
